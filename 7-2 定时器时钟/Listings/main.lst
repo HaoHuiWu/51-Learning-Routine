@@ -1,0 +1,77 @@
+C51 COMPILER V9.54   MAIN                                                                  01/08/2024 17:18:11 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main.l
+                    -st) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "Delay.h"
+   3          #include "Timer.h"
+   4          #include "LCD1602.h"
+   5          unsigned int sec,min,hour;
+   6          void main ()
+   7          {     
+   8   1          LCD_Init();
+   9   1          Timer0Init();
+  10   1          LCD_ShowString(1,1,"Clock:");
+  11   1          LCD_ShowString(2,1,"  :  :");
+  12   1          while(1)
+  13   1          { 
+  14   2            if(P3_1==0){min++;}
+  15   2            LCD_ShowNum(2,1,hour,2);
+  16   2            LCD_ShowNum(2,4,min,2);
+  17   2            LCD_ShowNum(2,7,sec,2);
+  18   2          }
+  19   1      }
+  20          
+  21          void Timer0_Routine()  interrupt 1
+  22          { 
+  23   1        static unsigned int T0cout;
+  24   1        TL0 = 0x18;   
+  25   1        TH0 = 0xFC;
+  26   1        T0cout++;
+  27   1        if(T0cout>=1000)
+  28   1        { 
+  29   2          T0cout=0;
+  30   2          sec++;
+  31   2          if(sec>=60)
+  32   2          {
+  33   3            sec=0;
+  34   3            min++;
+  35   3            if(min>=60)
+  36   3            {
+  37   4              min=0;
+  38   4              hour++;
+  39   4              if(hour>=60)
+  40   4              {
+  41   5                min=0;
+  42   5                hour++;
+  43   5                if(hour>=24)
+  44   5                {
+  45   6                  hour=0;
+  46   6                }
+  47   5              }
+  48   4            }
+  49   3          }
+  50   2        }
+  51   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.54   MAIN                                                                  01/08/2024 17:18:11 PAGE 2   
+
+   CODE SIZE        =    213    ----
+   CONSTANT SIZE    =     14    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      8    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,115 @@
+C51 COMPILER V9.54   MAIN                                                                  01/11/2024 14:16:04 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main.l
+                    -st) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "LCD1602.h"
+   3          #include "DS18B20.h"
+   4          #include "Delay.h"
+   5          #include "AT24C02.h"
+   6          #include "Key.h"
+   7          #include "Timer0.h"
+   8          
+   9          float T,Tshow;
+  10          unsigned char Thigh,Tlow;
+  11          unsigned char KeyNum;
+  12          
+  13          void main ()
+  14          { 
+  15   1        DS18B20_ConvertT();
+  16   1        Delay(1000);
+  17   1        Thigh=AT24C02_ReadByte(0);
+  18   1        Tlow=AT24C02_ReadByte(1); 
+  19   1        if(Thigh>125||Tlow<-55||Thigh<=Tlow)
+  20   1        {
+  21   2          Thigh=20;
+  22   2          Tlow=15;
+  23   2        }
+  24   1        Timer0Init();
+  25   1        LCD_Init();
+  26   1        LCD_ShowString(1,1,"T:");
+  27   1        LCD_ShowString(2,1,"TH:");
+  28   1        LCD_ShowString(2,9,"TL:");
+  29   1        LCD_ShowSignedNum(2,4,Thigh,3);
+  30   1        LCD_ShowSignedNum(2,12,Tlow,3);
+  31   1          while(1)
+  32   1          { 
+  33   2            KeyNum=Key();
+  34   2            DS18B20_ConvertT();     //温度读取及显示
+  35   2            T=DS18B20_ReadT();
+  36   2            if(T<0){LCD_ShowChar(1,3,'-');Tshow=-T;}
+  37   2            else{LCD_ShowChar(1,3,'+');Tshow=T;}
+  38   2            LCD_ShowNum(1,4,Tshow,3);
+  39   2            LCD_ShowChar(1,7,':');
+  40   2            LCD_ShowNum(1,8,(unsigned int)(Tshow*100)%100,3);
+  41   2            if(KeyNum)
+  42   2            {
+  43   3              if(KeyNum==1)
+  44   3              {
+  45   4                Thigh++;
+  46   4                if(Thigh>125){Thigh=125;}
+  47   4              }
+  48   3              if(KeyNum==2)
+  49   3              {
+  50   4                Thigh--;
+  51   4                if(Thigh<=Tlow){Thigh++;}
+  52   4              }
+  53   3              if(KeyNum==3)
+  54   3              {
+C51 COMPILER V9.54   MAIN                                                                  01/11/2024 14:16:04 PAGE 2   
+
+  55   4                Tlow++;
+  56   4                if(Tlow>=Thigh){Tlow--;}
+  57   4              }
+  58   3              if(KeyNum==4)
+  59   3              {
+  60   4                Tlow--;
+  61   4                if(Tlow<-55){Tlow=-55;}
+  62   4              }
+  63   3      
+  64   3              LCD_ShowSignedNum(2,4,Thigh,3);
+  65   3              LCD_ShowSignedNum(2,12,Tlow,3);
+  66   3      
+  67   3            }       
+  68   2              if(T>Thigh){LCD_ShowString(1,13,"OV:H");}
+  69   2              else if(T<Tlow){LCD_ShowString(1,13,"OV:L");}
+  70   2              else{LCD_ShowString(1,13,"    ");}
+  71   2              AT24C02_WriteByte(0,Thigh);
+  72   2              Delay(5);
+  73   2              AT24C02_WriteByte(1,Tlow);
+  74   2              Delay(5);
+  75   2          }
+  76   1      }
+  77          
+  78          void Timer0_Routine() interrupt 1
+  79          {
+  80   1        static unsigned int T0Count;
+  81   1        TL0 = 0x18;   //设置定时初值
+  82   1        TH0 = 0xFC;   //设置定时初值
+  83   1        T0Count++;
+  84   1        if(T0Count>=20)
+  85   1        {
+  86   2          T0Count=0;
+  87   2          Key_Loop();
+  88   2        }
+  89   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    587    ----
+   CONSTANT SIZE    =     26    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     13    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
